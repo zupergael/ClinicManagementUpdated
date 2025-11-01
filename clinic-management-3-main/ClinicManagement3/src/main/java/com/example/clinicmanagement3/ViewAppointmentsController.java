@@ -20,26 +20,13 @@ import java.util.ResourceBundle;
 
 public class ViewAppointmentsController implements Initializable {
 
-    @FXML
-    private TableView<Appointment> appointmentTable;
-
-    @FXML
-    private TableColumn<Appointment, String> dateColumn;
-
-    @FXML
-    private TableColumn<Appointment, String> timeColumn;
-
-    @FXML
-    private TableColumn<Appointment, String> serviceColumn;
-
-    @FXML
-    private TableColumn<Appointment, Void> actionColumn;
-
-    @FXML
-    private Button logoutButton;
-
-    @FXML
-    private Button backButton;
+    @FXML private TableView<Appointment> appointmentTable;
+    @FXML private TableColumn<Appointment, String> dateColumn;
+    @FXML private TableColumn<Appointment, String> timeColumn;
+    @FXML private TableColumn<Appointment, String> serviceColumn;
+    @FXML private TableColumn<Appointment, Void> actionColumn;
+    @FXML private Button logoutButton;
+    @FXML private Button backButton;
 
     private final ObservableList<Appointment> appointments = FXCollections.observableArrayList();
 

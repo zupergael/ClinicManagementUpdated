@@ -94,5 +94,10 @@
             <Font name="Arial Bold" size="20.0" />
          </font>
       </Label>
+      <Label fx:id="bookingWarningLabel" layoutX="150.0" layoutY="579.0" textFill="RED">
+         <font>
+            <Font name="Arial Bold" size="20.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

@@ -10,37 +10,32 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class PatientDashboardController {
 
-    @FXML
-    private Button appointmentButton;
-
-    @FXML
-    private Button logoutButton;
-
-    @FXML
-    private Button viewAppointmentsButton;
-
-    @FXML
-    private Label nameLabel;
-
-    @FXML
-    private Label ageLabel;
-
-    @FXML
-    private Label genderLabel;
-
-    @FXML
-    private Label contactLabel;
-
-    @FXML
-    private Label emergencyLabel;
-
-    @FXML
-    private Label greetingLabel;
+    @FXML private Button appointmentButton;
+    @FXML private Button logoutButton;
+    @FXML private Button viewAppointmentsButton;
+    @FXML private Label nameLabel;
+    @FXML private Label ageLabel;
+    @FXML private Label genderLabel;
+    @FXML private Label contactLabel;
+    @FXML private Label emergencyLabel;
+    @FXML private Label greetingLabel;
+    @FXML private Label dateLabel;
 
     private String currentUsername;
+
+    @FXML
+    public void initialize() {
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy", Locale.ENGLISH);
+        String formattedDate = today.format(formatter); // e.g., Wednesday, October 29, 2025
+        dateLabel.setText(formattedDate);
+    }
 
     public void setUsername(String username) {
         this.currentUsername = username;

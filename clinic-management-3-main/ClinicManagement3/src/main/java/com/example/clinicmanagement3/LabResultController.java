@@ -19,20 +19,11 @@ import java.util.ResourceBundle;
 
 public class LabResultController implements Initializable {
 
-    @FXML
-    private TableView<LabResult> labResultTable;
-
-    @FXML
-    private TableColumn<LabResult, String> servicesColumn;
-
-    @FXML
-    private TableColumn<LabResult, Void> resultsColumn;
-
-    @FXML
-    private Button logoutButton;
-
-    @FXML
-    private Button backButton;
+    @FXML private TableView<LabResult> labResultTable;
+    @FXML private TableColumn<LabResult, String> servicesColumn;
+    @FXML private TableColumn<LabResult, Void> resultsColumn;
+    @FXML private Button logoutButton;
+    @FXML private Button backButton;
 
     private String currentUsername;
 
