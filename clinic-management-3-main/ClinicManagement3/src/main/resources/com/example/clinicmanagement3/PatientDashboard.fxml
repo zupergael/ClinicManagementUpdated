@@ -120,5 +120,10 @@
             <Font name="Arial Bold" size="30.0" />
          </font>
       </Label>
+      <Label fx:id="dateLabel" layoutX="975.0" layoutY="100.0">
+         <font>
+            <Font name="Arial Bold" size="20.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

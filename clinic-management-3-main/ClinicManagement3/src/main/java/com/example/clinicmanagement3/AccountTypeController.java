@@ -16,21 +16,14 @@ import java.util.ResourceBundle;
 
 public class AccountTypeController implements Initializable {
 
-    @FXML
-    private ComboBox<String> accountTypeComboBox;
-
-    @FXML
-    private Button loginButton;
-
-    @FXML
-    private Button registerButton;
-
-    @FXML
-    private Label warningLabel;
+    @FXML private ComboBox<String> accountTypeComboBox;
+    @FXML private Button loginButton;
+    @FXML private Button registerButton;
+    @FXML private Label warningLabel;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        accountTypeComboBox.getItems().addAll("Admin", "Doctor", "Receptionist", "Patient");
+        accountTypeComboBox.getItems().addAll("Admin", "Doctor", "Receptionist", "Patient", "Secretary");
         accountTypeComboBox.setPromptText("Select Account Type");
     }
 
@@ -54,7 +47,7 @@ public class AccountTypeController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("SignUp.fxml")); // Login screen
             Parent loginRoot = loader.load();
 
-            HelloController loginController = loader.getController();
+            SignUpController loginController = loader.getController();
             loginController.setAccountType(selectedType);
 
             Stage stage = (Stage) loginButton.getScene().getWindow();
@@ -73,11 +66,24 @@ public class AccountTypeController implements Initializable {
         if (selectedType == null) return;
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Registration.fxml"));
+            FXMLLoader loader;
+
+            if (selectedType.equals("Secretary")) {
+                loader = new FXMLLoader(getClass().getResource("SecretaryRegistration.fxml"));
+            } else {
+                loader = new FXMLLoader(getClass().getResource("Registration.fxml"));
+            }
+
             Parent registerRoot = loader.load();
 
-            RegisterController registerController = loader.getController();
-            registerController.setAccountType(selectedType);
+            // Set account type on the appropriate controller
+            if (selectedType.equals("Secretary")) {
+                SecretaryRegisterController secretaryController = loader.getController();
+                secretaryController.setAccountType(selectedType);
+            } else {
+                RegisterController registerController = loader.getController();
+                registerController.setAccountType(selectedType);
+            }
 
             Stage stage = (Stage) registerButton.getScene().getWindow();
             stage.setScene(new Scene(registerRoot));

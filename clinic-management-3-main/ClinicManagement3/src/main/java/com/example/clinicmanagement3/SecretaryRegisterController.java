@@ -2,31 +2,28 @@ package com.example.clinicmanagement3;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class RegisterController {
+public class SecretaryRegisterController {
 
     @FXML private TextField fullNameField;
     @FXML private TextField ageField;
     @FXML private DatePicker birthdayPicker;
     @FXML private ComboBox<String> genderComboBox;
-    @FXML private TextField contactNumberField;
+    @FXML private TextField departmentField; // renamed from contactNumberField
     @FXML private TextField emergencyContactField;
     @FXML private TextField usernameField;
     @FXML private TextField passwordField;
     @FXML private Label warningLabel;
     @FXML private Label ageWarningLabel;
-    @FXML private Label contactWarningLabel;
     @FXML private Label emergencyWarningLabel;
     @FXML private Button registerButton;
 
@@ -44,21 +41,21 @@ public class RegisterController {
         String age = ageField.getText();
         var birthday = birthdayPicker.getValue();
         String gender = genderComboBox.getValue();
-        String contact = contactNumberField.getText();
+        String department = departmentField.getText(); // updated field
         String emergencyContact = emergencyContactField.getText();
         String username = usernameField.getText();
         String password = passwordField.getText();
 
+        // Reset styles and warnings
         warningLabel.setText("");
         ageWarningLabel.setText("");
-        contactWarningLabel.setText("");
         emergencyWarningLabel.setText("");
 
         fullNameField.setStyle("");
         ageField.setStyle("");
         birthdayPicker.setStyle("");
         genderComboBox.setStyle("");
-        contactNumberField.setStyle("");
+        departmentField.setStyle("");
         emergencyContactField.setStyle("");
         usernameField.setStyle("");
         passwordField.setStyle("");
@@ -66,7 +63,7 @@ public class RegisterController {
         boolean hasMissingField = false;
         boolean hasInvalidNumber = false;
 
-        // Check for missing fields
+        // Validation
         if (fullName == null || fullName.isEmpty()) {
             fullNameField.setStyle("-fx-border-color: red;");
             hasMissingField = true;
@@ -83,8 +80,8 @@ public class RegisterController {
             genderComboBox.setStyle("-fx-border-color: red;");
             hasMissingField = true;
         }
-        if (contact == null || contact.isEmpty()) {
-            contactNumberField.setStyle("-fx-border-color: red;");
+        if (department == null || department.isEmpty()) {
+            departmentField.setStyle("-fx-border-color: red;");
             hasMissingField = true;
         }
         if (emergencyContact == null || emergencyContact.isEmpty()) {
@@ -100,22 +97,15 @@ public class RegisterController {
             hasMissingField = true;
         }
 
-// Show general warning only if something is missing
         if (hasMissingField) {
             warningLabel.setStyle("-fx-text-fill: red;");
             warningLabel.setText("Please fill in all fields before registering.");
             return;
         }
 
-// Check for numeric validity
         if (!age.matches("\\d+")) {
             ageField.setStyle("-fx-border-color: red;");
             ageWarningLabel.setText("Age must be a number.");
-            hasInvalidNumber = true;
-        }
-        if (!contact.matches("\\d+")) {
-            contactNumberField.setStyle("-fx-border-color: red;");
-            contactWarningLabel.setText("Contact number must be numeric.");
             hasInvalidNumber = true;
         }
         if (!emergencyContact.matches("\\d+")) {
@@ -128,20 +118,20 @@ public class RegisterController {
             return;
         }
 
-        warningLabel.setText(""); // Clear general warning
+        warningLabel.setText("");
 
         try (Connection conn = DBConnection.getConnection()) {
-            String sql = "INSERT INTO user (full_name, age, birthday, gender, contact_number, emergency_contact, username, password, account_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO user_secretary (full_name, age, birthday, gender, department, emergency_contact, username, password, account_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, fullName);
             stmt.setString(2, age);
             stmt.setString(3, birthday.toString());
             stmt.setString(4, gender);
-            stmt.setString(5, contact);
+            stmt.setString(5, department);
             stmt.setString(6, emergencyContact);
             stmt.setString(7, username);
             stmt.setString(8, password);
-            stmt.setString(9, selectedAccountType);
+            stmt.setString(9, selectedAccountType); // should be "Secretary"
 
             stmt.executeUpdate();
 
@@ -178,9 +168,9 @@ public class RegisterController {
     public void handleBackToAccountType(javafx.event.ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("AccountType.fxml"));
-            Parent loginRoot = loader.load();
+            Parent accountTypeRoot = loader.load();
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(loginRoot));
+            stage.setScene(new Scene(accountTypeRoot));
             stage.setTitle("Clinic Management");
             stage.show();
         } catch (IOException e) {
@@ -191,6 +181,6 @@ public class RegisterController {
 
     public void setAccountType(String accountType) {
         this.selectedAccountType = accountType;
-        System.out.println("Received account type in RegisterController: " + accountType);
+        System.out.println("Received account type in SecretaryRegisterController: " + accountType);
     }
 }

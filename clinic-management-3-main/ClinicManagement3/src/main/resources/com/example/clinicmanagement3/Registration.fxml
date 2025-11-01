@@ -118,5 +118,28 @@
             <Font name="Arial Bold" size="26.0" />
          </font>
       </Label>
+      <Button fx:id="backButton" layoutX="33.0" layoutY="654.0" mnemonicParsing="false" onAction="#handleBackToAccountType" prefHeight="42.0" prefWidth="89.0" style="-fx-background-color: #184E74;" text="Back" textFill="WHITE">
+         <font>
+            <Font name="Arial Bold" size="20.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
+      <Label fx:id="ageWarningLabel" layoutX="530.0" layoutY="620.0" textFill="RED">
+         <font>
+            <Font name="Arial Bold" size="20.0" />
+         </font>
+      </Label>
+      <Label fx:id="contactWarningLabel" layoutX="480.0" layoutY="620.0" textFill="RED">
+         <font>
+            <Font name="Arial Bold" size="20.0" />
+         </font>
+      </Label>
+      <Label fx:id="emergencyWarningLabel" layoutX="450.0" layoutY="620.0" textFill="RED">
+         <font>
+            <Font name="Arial Bold" size="20.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

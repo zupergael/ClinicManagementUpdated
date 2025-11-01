@@ -18,41 +18,19 @@ import java.util.ResourceBundle;
 
 public class PatientAppointmentController implements Initializable {
 
-    @FXML
-    private ComboBox<String> timeComboBox;
+    @FXML private ComboBox<String> timeComboBox;
+    @FXML private ComboBox<String> serviceComboBox;
+    @FXML private Button backButton;
+    @FXML private Button logoutButton;
+    @FXML private DatePicker appointmentDatePicker;
 
-    @FXML
-    private ComboBox<String> serviceComboBox;
-
-    @FXML
-    private Button backButton;
-
-    @FXML
-    private Button logoutButton;
-
-    @FXML
-    private DatePicker appointmentDatePicker;
-
-    @FXML
-    private Label warningLabel;
-
-    @FXML
-    private Label successLabel;
-
-    @FXML
-    private Label rescheduleWarningLabel;
-
-    @FXML
-    private TableView<Appointment> appointmentTable;
-
-    @FXML
-    private TableColumn<Appointment, String> dateColumn;
-
-    @FXML
-    private TableColumn<Appointment, String> timeColumn;
-
-    @FXML
-    private TableColumn<Appointment, String> serviceColumn;
+    @FXML private Label bookingWarningLabel;
+    @FXML private Label successLabel;
+    @FXML private Label rescheduleWarningLabel;
+    @FXML private TableView<Appointment> appointmentTable;
+    @FXML private TableColumn<Appointment, String> dateColumn;
+    @FXML private TableColumn<Appointment, String> timeColumn;
+    @FXML private TableColumn<Appointment, String> serviceColumn;
 
     private final ObservableList<Appointment> appointmentList = FXCollections.observableArrayList();
 
@@ -117,8 +95,9 @@ public class PatientAppointmentController implements Initializable {
             System.out.println("Appointments loaded for: " + currentUsername);
         } catch (SQLException e) {
             e.printStackTrace();
-            warningLabel.setStyle("-fx-text-fill: red;");
-            warningLabel.setText("Failed to load appointments.");
+            // Updated label reference
+            bookingWarningLabel.setStyle("-fx-text-fill: red;");
+            bookingWarningLabel.setText("Failed to load appointments.");
         }
     }
 
@@ -128,14 +107,17 @@ public class PatientAppointmentController implements Initializable {
         String selectedService = serviceComboBox.getValue();
         var selectedDate = appointmentDatePicker.getValue();
 
+        // Clear all previous messages and styles
         timeComboBox.setStyle("");
         serviceComboBox.setStyle("");
         appointmentDatePicker.setStyle("");
-        warningLabel.setText("");
+        bookingWarningLabel.setText(""); // Updated label reference
         successLabel.setText("");
+        rescheduleWarningLabel.setText("");
 
         boolean hasError = false;
 
+        // --- 1. Client-Side Validation ---
         if (selectedTime == null) {
             timeComboBox.setStyle("-fx-border-color: red;");
             hasError = true;
@@ -152,82 +134,112 @@ public class PatientAppointmentController implements Initializable {
         }
 
         if (currentUsername == null || currentUsername.isEmpty()) {
-            warningLabel.setStyle("-fx-text-fill: red;");
-            warningLabel.setText("User session error: username not set.");
+            bookingWarningLabel.setStyle("-fx-text-fill: red;"); // Updated label reference
+            bookingWarningLabel.setText("User session error: username not set."); // Updated label reference
             System.out.println("Booking failed: currentUsername is null.");
             return;
         }
 
         if (hasError) {
-            warningLabel.setStyle("-fx-text-fill: red;");
-            warningLabel.setText("Please fill in all fields before booking.");
-        } else {
-            String formattedDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            bookingWarningLabel.setStyle("-fx-text-fill: red;"); // Updated label reference
+            bookingWarningLabel.setText("Please fill in all fields before booking."); // Updated label reference
+            return;
+        }
 
-            try (Connection conn = DBConnection.getConnection()) {
-                String getUserSql = "SELECT id, full_name FROM user WHERE username = ?";
-                PreparedStatement getUserStmt = conn.prepareStatement(getUserSql);
-                getUserStmt.setString(1, currentUsername);
-                ResultSet rs = getUserStmt.executeQuery();
+        String formattedDate = selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-                if (rs.next()) {
-                    int userId = rs.getInt("id");
-                    String fullName = rs.getString("full_name");
+        try (Connection conn = DBConnection.getConnection()) {
+            String getUserSql = "SELECT id, full_name FROM user WHERE username = ?";
+            PreparedStatement getUserStmt = conn.prepareStatement(getUserSql);
+            getUserStmt.setString(1, currentUsername);
+            ResultSet rs = getUserStmt.executeQuery();
 
-                    if (appointmentToReschedule != null) {
-                        // Update existing appointment
-                        String updateSql = """
-                            UPDATE appointments
-                            SET appointment_date = ?, appointment_time = ?, service = ?
-                            WHERE user_id = ? AND appointment_date = ? AND appointment_time = ?
-                            """;
-                        PreparedStatement stmt = conn.prepareStatement(updateSql);
-                        stmt.setString(1, formattedDate);
-                        stmt.setString(2, selectedTime);
-                        stmt.setString(3, selectedService);
-                        stmt.setInt(4, userId);
-                        stmt.setString(5, appointmentToReschedule.getDate());
-                        stmt.setString(6, appointmentToReschedule.getTime());
-                        stmt.executeUpdate();
+            if (rs.next()) {
+                int userId = rs.getInt("id");
+                String fullName = rs.getString("full_name");
 
-                        successLabel.setText("Appointment rescheduled successfully!");
-                        System.out.println("Rescheduled appointment for user_id=" + userId);
+                // --- 2. System-Wide Conflict Check ---
+                String conflictSql = "SELECT COUNT(*) FROM appointments " +
+                        "WHERE appointment_date = ? AND appointment_time = ?";
 
-                        appointmentToReschedule = null; // Clear after update
-                        loadAppointmentsFromDatabase(); // Refresh table instead of adding manually
-                    } else {
-                        // Insert new appointment
-                        String insertSql = "INSERT INTO appointments (user_id, full_name, appointment_date, appointment_time, service) VALUES (?, ?, ?, ?, ?)";
-                        PreparedStatement stmt = conn.prepareStatement(insertSql);
-                        stmt.setInt(1, userId);
-                        stmt.setString(2, fullName);
-                        stmt.setString(3, formattedDate);
-                        stmt.setString(4, selectedTime);
-                        stmt.setString(5, selectedService);
-                        stmt.executeUpdate();
-
-                        System.out.println("New appointment booked for user_id=" + userId);
-
-                        Appointment appointment = new Appointment(formattedDate, selectedTime, selectedService, currentUsername, fullName);
-                        loadAppointmentsFromDatabase();
-                    }
-
-                    successLabel.setStyle("-fx-text-fill: green;");
-                    successLabel.setText("Appointment saved successfully!");
-
-                    appointmentDatePicker.setValue(null);
-                    timeComboBox.setValue(null);
-                    serviceComboBox.setValue(null);
-                } else {
-                    warningLabel.setStyle("-fx-text-fill: red;");
-                    warningLabel.setText("User not found in database.");
-                    System.out.println("Booking failed: user not found for username = " + currentUsername);
+                // Exclusion logic for when rescheduling
+                if (appointmentToReschedule != null) {
+                    conflictSql += " AND NOT (user_id = ? AND appointment_date = ? AND appointment_time = ?)";
                 }
-            } catch (SQLException e) {
-                warningLabel.setStyle("-fx-text-fill: red;");
-                warningLabel.setText("Database error: " + e.getMessage());
-                e.printStackTrace();
+
+                PreparedStatement conflictStmt = conn.prepareStatement(conflictSql);
+                conflictStmt.setString(1, formattedDate);
+                conflictStmt.setString(2, selectedTime);
+
+                if (appointmentToReschedule != null) {
+                    // Set the parameters for the exclusion clause
+                    conflictStmt.setInt(3, userId);
+                    conflictStmt.setString(4, appointmentToReschedule.getDate());
+                    conflictStmt.setString(5, appointmentToReschedule.getTime());
+                }
+
+                ResultSet conflictRs = conflictStmt.executeQuery();
+
+                if (conflictRs.next() && conflictRs.getInt(1) > 0) {
+                    // *** Dedicated Warning Message for Conflict ***
+                    bookingWarningLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;"); // Updated label reference
+                    bookingWarningLabel.setText("This time slot is already taken. Please choose another date or time."); // Updated label reference
+                    return; // Stop the booking process
+                }
+
+                // --- 3. Execute Insert or Update ---
+                if (appointmentToReschedule != null) {
+                    // Rescheduling (Update)
+                    String updateSql = """
+                        UPDATE appointments
+                        SET appointment_date = ?, appointment_time = ?, service = ?
+                        WHERE user_id = ? AND appointment_date = ? AND appointment_time = ?
+                        """;
+                    PreparedStatement stmt = conn.prepareStatement(updateSql);
+                    stmt.setString(1, formattedDate);
+                    stmt.setString(2, selectedTime);
+                    stmt.setString(3, selectedService);
+                    stmt.setInt(4, userId);
+                    stmt.setString(5, appointmentToReschedule.getDate());
+                    stmt.setString(6, appointmentToReschedule.getTime());
+                    stmt.executeUpdate();
+
+                    successLabel.setText("Appointment rescheduled successfully!");
+                    System.out.println("Rescheduled appointment for user_id=" + userId);
+
+                    appointmentToReschedule = null; // Clear after update
+                } else {
+                    // Insert new appointment
+                    String insertSql = "INSERT INTO appointments (user_id, full_name, appointment_date, appointment_time, service) VALUES (?, ?, ?, ?, ?)";
+                    PreparedStatement stmt = conn.prepareStatement(insertSql);
+                    stmt.setInt(1, userId);
+                    stmt.setString(2, fullName);
+                    stmt.setString(3, formattedDate);
+                    stmt.setString(4, selectedTime);
+                    stmt.setString(5, selectedService);
+                    stmt.executeUpdate();
+
+                    System.out.println("New appointment booked for user_id=" + userId);
+                    successLabel.setText("Appointment saved successfully!");
+                }
+
+                successLabel.setStyle("-fx-text-fill: green;");
+
+                // --- 4. Final Cleanup ---
+                loadAppointmentsFromDatabase();
+                appointmentDatePicker.setValue(null);
+                timeComboBox.setValue(null);
+                serviceComboBox.setValue(null);
+
+            } else {
+                bookingWarningLabel.setStyle("-fx-text-fill: red;"); // Updated label reference
+                bookingWarningLabel.setText("User not found in database."); // Updated label reference
+                System.out.println("Booking failed: user not found for username = " + currentUsername);
             }
+        } catch (SQLException e) {
+            bookingWarningLabel.setStyle("-fx-text-fill: red;"); // Updated label reference
+            bookingWarningLabel.setText("Database error: " + e.getMessage()); // Updated label reference
+            e.printStackTrace();
         }
     }
 
@@ -243,8 +255,9 @@ public class PatientAppointmentController implements Initializable {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            warningLabel.setStyle("-fx-text-fill: red;");
-            warningLabel.setText("Failed to load signup screen.");
+            // Updated label reference
+            bookingWarningLabel.setStyle("-fx-text-fill: red;");
+            bookingWarningLabel.setText("Failed to load signup screen.");
         }
     }
 
@@ -276,5 +289,6 @@ public class PatientAppointmentController implements Initializable {
         rescheduleWarningLabel.setText("Editing appointment for " + appointment.getDate() + " at " + appointment.getTime());
 
         successLabel.setText("");
+        bookingWarningLabel.setText(""); // Added to clear the general warning label
     }
 }
