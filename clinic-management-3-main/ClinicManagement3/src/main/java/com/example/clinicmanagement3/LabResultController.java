@@ -22,8 +22,6 @@ public class LabResultController implements Initializable {
     @FXML private TableView<LabResult> labResultTable;
     @FXML private TableColumn<LabResult, String> servicesColumn;
     @FXML private TableColumn<LabResult, Void> resultsColumn;
-    @FXML private Button logoutButton;
-    @FXML private Button backButton;
 
     private String currentUsername;
 
@@ -33,10 +31,8 @@ public class LabResultController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Bind service column to LabResult.service
         servicesColumn.setCellValueFactory(new PropertyValueFactory<>("service"));
 
-        // Add "View" button to each row in results column
         resultsColumn.setCellFactory(col -> new TableCell<>() {
             private final Button viewButton = new Button("View");
 
@@ -54,7 +50,6 @@ public class LabResultController implements Initializable {
             }
         });
 
-        // Sample data
         labResultTable.getItems().addAll(
                 new LabResult("Blood Test"),
                 new LabResult("X-Ray"),
@@ -67,10 +62,9 @@ public class LabResultController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("LabResultView.fxml"));
             Parent root = loader.load();
 
-            // Optional: only call setLabResult if the controller supports it
             Object controllerObj = loader.getController();
             if (controllerObj instanceof LabResultController controller) {
-                controller.setLabResult(result); // Safe call
+                controller.setLabResult(result);
             }
 
             Stage stage = new Stage();
@@ -118,7 +112,6 @@ public class LabResultController implements Initializable {
             stage.setTitle("Clinic Management");
             stage.show();
 
-            // Close current window
             Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             currentStage.close();
         } catch (Exception e) {

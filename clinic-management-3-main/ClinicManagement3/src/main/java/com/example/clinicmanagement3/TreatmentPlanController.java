@@ -25,7 +25,6 @@ public class TreatmentPlanController {
             stage.setTitle("Clinic Management");
             stage.show();
 
-            // Close current window
             Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             currentStage.close();
         } catch (Exception e) {

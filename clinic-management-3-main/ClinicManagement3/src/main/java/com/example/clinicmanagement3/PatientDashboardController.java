@@ -33,15 +33,15 @@ public class PatientDashboardController {
     public void initialize() {
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy", Locale.ENGLISH);
-        String formattedDate = today.format(formatter); // e.g., Wednesday, October 29, 2025
+        String formattedDate = today.format(formatter);
         dateLabel.setText(formattedDate);
     }
 
     public void setUsername(String username) {
         this.currentUsername = username;
         System.out.println("Dashboard received username: " + username);
-        loadPatientGreeting(); // Load full name for greeting
-        loadPatientInfo();     // Load other details
+        loadPatientGreeting();
+        loadPatientInfo();
     }
 
     @FXML
@@ -90,7 +90,7 @@ public class PatientDashboardController {
             Parent root = loader.load();
 
             TreatmentPlanController controller = loader.getController();
-            controller.setUsername(currentUsername); //
+            controller.setUsername(currentUsername);
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -108,7 +108,7 @@ public class PatientDashboardController {
             Parent appointmentRoot = loader.load();
 
             PatientAppointmentController appointmentController = loader.getController();
-            appointmentController.setUsername(currentUsername); // ✅ Pass again
+            appointmentController.setUsername(currentUsername);
 
             Stage stage = (Stage) appointmentButton.getScene().getWindow();
             stage.setScene(new Scene(appointmentRoot));

@@ -76,7 +76,6 @@ public class AccountTypeController implements Initializable {
 
             Parent registerRoot = loader.load();
 
-            // Set account type on the appropriate controller
             if (selectedType.equals("Secretary")) {
                 SecretaryRegisterController secretaryController = loader.getController();
                 secretaryController.setAccountType(selectedType);

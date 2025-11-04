@@ -95,7 +95,6 @@ public class SecretaryAppointmentsController implements Initializable {
 
     private void handleManage(SecretaryAppointment appointment) {
         System.out.println("Managing appointment for: " + appointment.getFullName());
-        // You can load a new FXML screen or open a dialog here
     }
 
     @FXML

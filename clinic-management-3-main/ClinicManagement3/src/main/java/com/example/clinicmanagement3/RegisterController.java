@@ -66,7 +66,6 @@ public class RegisterController {
         boolean hasMissingField = false;
         boolean hasInvalidNumber = false;
 
-        // Check for missing fields
         if (fullName == null || fullName.isEmpty()) {
             fullNameField.setStyle("-fx-border-color: red;");
             hasMissingField = true;
@@ -100,14 +99,12 @@ public class RegisterController {
             hasMissingField = true;
         }
 
-// Show general warning only if something is missing
         if (hasMissingField) {
             warningLabel.setStyle("-fx-text-fill: red;");
             warningLabel.setText("Please fill in all fields before registering.");
             return;
         }
 
-// Check for numeric validity
         if (!age.matches("\\d+")) {
             ageField.setStyle("-fx-border-color: red;");
             ageWarningLabel.setText("Age must be a number.");
@@ -128,7 +125,7 @@ public class RegisterController {
             return;
         }
 
-        warningLabel.setText(""); // Clear general warning
+        warningLabel.setText("");
 
         try (Connection conn = DBConnection.getConnection()) {
             String sql = "INSERT INTO user (full_name, age, birthday, gender, contact_number, emergency_contact, username, password, account_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";

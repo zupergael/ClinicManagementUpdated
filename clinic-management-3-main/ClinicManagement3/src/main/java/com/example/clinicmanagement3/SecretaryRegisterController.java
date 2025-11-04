@@ -18,7 +18,7 @@ public class SecretaryRegisterController {
     @FXML private TextField ageField;
     @FXML private DatePicker birthdayPicker;
     @FXML private ComboBox<String> genderComboBox;
-    @FXML private TextField departmentField; // renamed from contactNumberField
+    @FXML private TextField departmentField;
     @FXML private TextField emergencyContactField;
     @FXML private TextField usernameField;
     @FXML private TextField passwordField;
@@ -41,7 +41,7 @@ public class SecretaryRegisterController {
         String age = ageField.getText();
         var birthday = birthdayPicker.getValue();
         String gender = genderComboBox.getValue();
-        String department = departmentField.getText(); // updated field
+        String department = departmentField.getText();
         String emergencyContact = emergencyContactField.getText();
         String username = usernameField.getText();
         String password = passwordField.getText();
@@ -63,7 +63,6 @@ public class SecretaryRegisterController {
         boolean hasMissingField = false;
         boolean hasInvalidNumber = false;
 
-        // Validation
         if (fullName == null || fullName.isEmpty()) {
             fullNameField.setStyle("-fx-border-color: red;");
             hasMissingField = true;
@@ -131,7 +130,7 @@ public class SecretaryRegisterController {
             stmt.setString(6, emergencyContact);
             stmt.setString(7, username);
             stmt.setString(8, password);
-            stmt.setString(9, selectedAccountType); // should be "Secretary"
+            stmt.setString(9, selectedAccountType);
 
             stmt.executeUpdate();
 

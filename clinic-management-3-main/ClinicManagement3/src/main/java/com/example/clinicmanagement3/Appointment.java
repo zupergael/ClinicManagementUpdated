@@ -4,8 +4,8 @@ public class Appointment {
     private final String date;
     private final String time;
     private final String service;
-    private final String username;   // Used for database linkage
-    private final String fullName;   // Used for display
+    private final String username;
+    private final String fullName;
 
     public Appointment(String date, String time, String service, String username, String fullName) {
         this.date = date;

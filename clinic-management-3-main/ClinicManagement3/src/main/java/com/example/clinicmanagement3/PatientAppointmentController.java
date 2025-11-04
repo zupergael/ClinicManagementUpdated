@@ -95,7 +95,7 @@ public class PatientAppointmentController implements Initializable {
             System.out.println("Appointments loaded for: " + currentUsername);
         } catch (SQLException e) {
             e.printStackTrace();
-            // Updated label reference
+
             bookingWarningLabel.setStyle("-fx-text-fill: red;");
             bookingWarningLabel.setText("Failed to load appointments.");
         }
@@ -107,17 +107,15 @@ public class PatientAppointmentController implements Initializable {
         String selectedService = serviceComboBox.getValue();
         var selectedDate = appointmentDatePicker.getValue();
 
-        // Clear all previous messages and styles
         timeComboBox.setStyle("");
         serviceComboBox.setStyle("");
         appointmentDatePicker.setStyle("");
-        bookingWarningLabel.setText(""); // Updated label reference
+        bookingWarningLabel.setText("");
         successLabel.setText("");
         rescheduleWarningLabel.setText("");
 
         boolean hasError = false;
 
-        // --- 1. Client-Side Validation ---
         if (selectedTime == null) {
             timeComboBox.setStyle("-fx-border-color: red;");
             hasError = true;
@@ -134,15 +132,15 @@ public class PatientAppointmentController implements Initializable {
         }
 
         if (currentUsername == null || currentUsername.isEmpty()) {
-            bookingWarningLabel.setStyle("-fx-text-fill: red;"); // Updated label reference
-            bookingWarningLabel.setText("User session error: username not set."); // Updated label reference
+            bookingWarningLabel.setStyle("-fx-text-fill: red;");
+            bookingWarningLabel.setText("User session error: username not set.");
             System.out.println("Booking failed: currentUsername is null.");
             return;
         }
 
         if (hasError) {
-            bookingWarningLabel.setStyle("-fx-text-fill: red;"); // Updated label reference
-            bookingWarningLabel.setText("Please fill in all fields before booking."); // Updated label reference
+            bookingWarningLabel.setStyle("-fx-text-fill: red;");
+            bookingWarningLabel.setText("Please fill in all fields before booking.");
             return;
         }
 
@@ -158,11 +156,9 @@ public class PatientAppointmentController implements Initializable {
                 int userId = rs.getInt("id");
                 String fullName = rs.getString("full_name");
 
-                // --- 2. System-Wide Conflict Check ---
                 String conflictSql = "SELECT COUNT(*) FROM appointments " +
                         "WHERE appointment_date = ? AND appointment_time = ?";
 
-                // Exclusion logic for when rescheduling
                 if (appointmentToReschedule != null) {
                     conflictSql += " AND NOT (user_id = ? AND appointment_date = ? AND appointment_time = ?)";
                 }
@@ -172,7 +168,6 @@ public class PatientAppointmentController implements Initializable {
                 conflictStmt.setString(2, selectedTime);
 
                 if (appointmentToReschedule != null) {
-                    // Set the parameters for the exclusion clause
                     conflictStmt.setInt(3, userId);
                     conflictStmt.setString(4, appointmentToReschedule.getDate());
                     conflictStmt.setString(5, appointmentToReschedule.getTime());
@@ -181,15 +176,12 @@ public class PatientAppointmentController implements Initializable {
                 ResultSet conflictRs = conflictStmt.executeQuery();
 
                 if (conflictRs.next() && conflictRs.getInt(1) > 0) {
-                    // *** Dedicated Warning Message for Conflict ***
-                    bookingWarningLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;"); // Updated label reference
-                    bookingWarningLabel.setText("This time slot is already taken. Please choose another date or time."); // Updated label reference
-                    return; // Stop the booking process
+                    bookingWarningLabel.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+                    bookingWarningLabel.setText("This time slot is already taken. Please choose another date or time.");
+                    return;
                 }
 
-                // --- 3. Execute Insert or Update ---
                 if (appointmentToReschedule != null) {
-                    // Rescheduling (Update)
                     String updateSql = """
                         UPDATE appointments
                         SET appointment_date = ?, appointment_time = ?, service = ?
@@ -207,9 +199,8 @@ public class PatientAppointmentController implements Initializable {
                     successLabel.setText("Appointment rescheduled successfully!");
                     System.out.println("Rescheduled appointment for user_id=" + userId);
 
-                    appointmentToReschedule = null; // Clear after update
+                    appointmentToReschedule = null;
                 } else {
-                    // Insert new appointment
                     String insertSql = "INSERT INTO appointments (user_id, full_name, appointment_date, appointment_time, service) VALUES (?, ?, ?, ?, ?)";
                     PreparedStatement stmt = conn.prepareStatement(insertSql);
                     stmt.setInt(1, userId);
@@ -225,20 +216,20 @@ public class PatientAppointmentController implements Initializable {
 
                 successLabel.setStyle("-fx-text-fill: green;");
 
-                // --- 4. Final Cleanup ---
+
                 loadAppointmentsFromDatabase();
                 appointmentDatePicker.setValue(null);
                 timeComboBox.setValue(null);
                 serviceComboBox.setValue(null);
 
             } else {
-                bookingWarningLabel.setStyle("-fx-text-fill: red;"); // Updated label reference
-                bookingWarningLabel.setText("User not found in database."); // Updated label reference
+                bookingWarningLabel.setStyle("-fx-text-fill: red;");
+                bookingWarningLabel.setText("User not found in database.");
                 System.out.println("Booking failed: user not found for username = " + currentUsername);
             }
         } catch (SQLException e) {
-            bookingWarningLabel.setStyle("-fx-text-fill: red;"); // Updated label reference
-            bookingWarningLabel.setText("Database error: " + e.getMessage()); // Updated label reference
+            bookingWarningLabel.setStyle("-fx-text-fill: red;");
+            bookingWarningLabel.setText("Database error: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -255,7 +246,7 @@ public class PatientAppointmentController implements Initializable {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            // Updated label reference
+
             bookingWarningLabel.setStyle("-fx-text-fill: red;");
             bookingWarningLabel.setText("Failed to load signup screen.");
         }
@@ -289,6 +280,6 @@ public class PatientAppointmentController implements Initializable {
         rescheduleWarningLabel.setText("Editing appointment for " + appointment.getDate() + " at " + appointment.getTime());
 
         successLabel.setText("");
-        bookingWarningLabel.setText(""); // Added to clear the general warning label
+        bookingWarningLabel.setText("");
     }
 }
